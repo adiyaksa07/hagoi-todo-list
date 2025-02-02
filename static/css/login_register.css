@@ -1,0 +1,25 @@
+body {
+    background-color: #f8f9fa;
+    height: 100vh;
+}
+.login-container {
+    max-width: 400px;
+    margin: auto;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    text-align: center;
+}
+.illustration-container {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.illustration {
+    max-width: 80%;
+    height: auto;
+}
+
+.links {
+    text-decoration: none;
+}

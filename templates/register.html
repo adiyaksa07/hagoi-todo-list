@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register - Todo List</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/login_register.css') }}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+  <body>
+
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <script>
+      {% for category, message in messages %}
+          Swal.fire({
+              icon: "{{ category }}",
+              title: "{{ message }}",
+              showConfirmButton: true,
+              confirmButtonColor: "#2d6e3e",
+              timer: 5000
+          });
+      {% endfor %}
+    </script>
+    {% endif %} {% endwith %}
+    
+    <div
+      class="container d-flex justify-content-center align-items-center vh-100"
+    >
+      <div class="row w-100">
+        <div class="col-md-6 d-flex align-items-center justify-content-center">
+          <div class="illustration-container">
+            <img
+              src="{{ url_for('static', filename='image/registers_image.png') }}"
+              alt="Illustration"
+              class="illustration"
+            />
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="login-container">
+            <h3 class="text-center">🫡 Selamat Bergabung</h3>
+            <p class="text-muted">Silakan register di bawah ini 🏡</p>
+            <form method="post">
+              <div class="mb-3">
+                <label for="text" class="form-label">Username</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="username"
+                  placeholder="Masukan username"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label text-start"
+                  >Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  name="password"
+                  placeholder="Masukan password"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label text-start"
+                  >Konfirmasi Password</label
+                >
+                <input
+                  type="password"
+                  class="form-control"
+                  name="confirm_password"
+                  placeholder="Konfirmasi password"
+                  required
+                />
+              </div>
+              <input
+                type="submit"
+                class="btn btn-success w-100 mb-3"
+                value="Register"
+              />
+              <a href="{{ url_for('login') }}" class="links text-success"
+                >Sudah memiliki akun? login disini!</a
+              >
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

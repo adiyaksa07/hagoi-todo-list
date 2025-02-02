@@ -1,0 +1,25 @@
+body {
+    background-color: #f8faf5;
+    font-family: 'Inter', sans-serif;
+}
+.profile-container {
+    max-width: 500px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+.btn-save {
+    background-color: #2e7d32;
+    color: white;
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: bold;
+    transition: transform 0.2s ease;
+}
+.btn-save:hover {
+    background-color: #4caf50;
+    transform: translateY(-2px);
+}

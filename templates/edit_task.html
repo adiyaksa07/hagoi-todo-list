@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Task - Todo List</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css' )}}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/edit_task.css' )}}"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  </head>
+
+  <body>
+    {% with messages = get_flashed_messages(with_categories=true) %} {% if
+    messages %}
+    <script>
+      {% for category, message in messages %}
+      Swal.fire({
+          icon: "{{ category }}",
+          title: "{{ message }}",
+          showConfirmButton: true,
+          confirmButtonColor: "#2d6e3e",
+          timer: 3000
+      });
+      {% endfor %}
+    </script>
+    {% endif %} {% endwith %}
+    <nav class="navbar d-flex justify-content-between align-items-center">
+      <div class="profile d-flex align-items-center">
+        <img
+          src="https://www.svgrepo.com/show/384678/account-avatar-profile-user-9.svg"
+          alt="Profile"
+          width="40"
+        />
+        <a
+          href="{{ url_for('profile') }}"
+          style="text-decoration: none"
+          class="text-dark"
+          >👋 Halo, {{ session['username'] }}</a
+        >
+      </div>
+      <a href="/logout" class="btn btn-outline-success">Logout</a>
+    </nav>
+    <div class="container edit-container">
+      <h2 class="text-center">Edit Task</h2>
+      <form method="POST">
+        <div class="mb-3">
+          <label for="task" class="form-label">Tugas:</label>
+          <input
+            type="text"
+            class="form-control"
+            id="task"
+            name="task"
+            value="{{ task.text }}"
+            required
+          />
+        </div>
+        <button type="submit" class="btn btn-save">💾 Simpan Perubahan</button>
+        <a href="/" class="btn btn-outline-secondary w-100 mt-2">⬅ Kembali</a>
+      </form>
+    </div>
+  </body>
+</html>
