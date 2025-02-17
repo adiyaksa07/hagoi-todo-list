@@ -24,7 +24,7 @@ mysql = MySQL(application)
 def home():
     if 'logged' not in session:
         return redirect(url_for('login'))
-
+    
     if 'task_submitted' in session:
         session.pop('task_submitted')
 
@@ -58,7 +58,7 @@ def login():
             return redirect(url_for('home'))
         else:
             flash('Username atau password salah!', 'error')
-            return render_template("index.jinja2")
+            return render_template("login.jinja2")
 
     
 @application.route("/register", methods=['GET', 'POST'])
@@ -130,14 +130,11 @@ def add_task():
     if task_text:
         if 'task_submitted' in session:
             return redirect(url_for("home"))
-         
         cursor = mysql.connection.cursor()
         cursor.execute("INSERT INTO tasks (user_id, text, priority, due_date) VALUES (%s, %s, %s, %s)", 
                        (session['user_id'], task_text, priority, due_date))
         mysql.connection.commit()
         cursor.close()
-
-        session['task_submitted'] = True
     
     return redirect(url_for('home'))
 
