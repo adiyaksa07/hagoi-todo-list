@@ -13,9 +13,9 @@ from flask_mysqldb import MySQL
 application = Flask(__name__)
 
 application.config['SECRET_KEY'] = secrets.token_hex(32) 
-application.config['MYSQL_HOST'] = os.getenv('HOST')
+application.config['MYSQL_HOST'] = os.getenv("HOST")
 application.config['MYSQL_USER'] = os.getenv("USER")
-application.config['MYSQL_PASSWORD'] = os.getenv('PASSWORD')
+application.config['MYSQL_PASSWORD'] = os.getenv("PASSWORD")
 application.config['MYSQL_DB'] = "prod_hagoi_todo_db"
 
 mysql = MySQL(application)
@@ -24,6 +24,9 @@ mysql = MySQL(application)
 def home():
     if 'logged' not in session:
         return redirect(url_for('login'))
+
+    if 'task_submitted' in session:
+        session.pop('task_submitted')
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
     cursor.execute("SELECT * FROM tasks WHERE user_id = %s", (session['user_id'],))
@@ -125,6 +128,9 @@ def add_task():
         return redirect(url_for("home")) 
 
     if task_text:
+        if 'task_submitted' in session:
+            return redirect(url_for("home"))
+         
         cursor = mysql.connection.cursor()
         cursor.execute("INSERT INTO tasks (user_id, text, priority, due_date) VALUES (%s, %s, %s, %s)", 
                        (session['user_id'], task_text, priority, due_date))
@@ -227,4 +233,4 @@ def profile():
     return render_template("profile.jinja2")
 
 if __name__ == "__main__": 
-    application.run(debug=True)
+    application.run(debug=False)
