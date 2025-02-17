@@ -136,6 +136,8 @@ def add_task():
                        (session['user_id'], task_text, priority, due_date))
         mysql.connection.commit()
         cursor.close()
+
+        session['task_submitted'] = True
     
     return redirect(url_for('home'))
 
