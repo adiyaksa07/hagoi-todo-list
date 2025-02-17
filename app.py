@@ -1,18 +1,22 @@
 import secrets
 import bcrypt 
 import MySQLdb.cursors
+import os
+import dotenv
 
+dotenv.load_dotenv()
+
+from datetime import datetime
 from flask import Flask, render_template, session, redirect, url_for, request, flash
 from flask_mysqldb import MySQL
 
 application = Flask(__name__)
 
-application.config['SECRET_KEY'] = secrets.token_hex(32) # Generate a random SECRET_KEY
-
-application.config['MYSQL_HOST'] = 'localhost'
-application.config['MYSQL_USER'] = 'root'
-application.config['MYSQL_PASSWORD'] = ''
-application.config['MYSQL_DB'] = 'todo_python'
+application.config['SECRET_KEY'] = secrets.token_hex(32) 
+application.config['MYSQL_HOST'] = os.getenv('HOST')
+application.config['MYSQL_USER'] = os.getenv("USER")
+application.config['MYSQL_PASSWORD'] = os.getenv('PASSWORD')
+application.config['MYSQL_DB'] = "prod_hagoi_todo_db"
 
 mysql = MySQL(application)
 
@@ -22,20 +26,19 @@ def home():
         return redirect(url_for('login'))
 
     cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
-    cursor.execute("SELECT * FROM tasks WHERE user_id = %s ORDER BY created_at DESC", (session['user_id'],))
+    cursor.execute("SELECT * FROM tasks WHERE user_id = %s", (session['user_id'],))
     tasks = cursor.fetchall()
     cursor.close()
 
-    return render_template("index.html", tasks=tasks)
+    return render_template("index.jinja2", tasks=tasks)
 
 @application.route("/login", methods=['GET', 'POST'])
 def login():
     if request.method == "GET":
-
         if 'logged' in session:
             return redirect(url_for('home'))
         
-        return render_template("login.html")
+        return render_template("login.jinja2")
     elif request.method == "POST":
         username = request.form['username']
         password = request.form['password']
@@ -52,7 +55,7 @@ def login():
             return redirect(url_for('home'))
         else:
             flash('Username atau password salah!', 'error')
-            return render_template("login.html")
+            return render_template("index.jinja2")
 
     
 @application.route("/register", methods=['GET', 'POST'])
@@ -61,7 +64,7 @@ def register():
         if 'logged' in session: 
             return redirect(url_for('home'))
 
-        return render_template("register.html")
+        return render_template("register.jinja2")
     elif request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
@@ -69,11 +72,11 @@ def register():
 
         if username == "":
             flash("Username anda kosong!", "error")
-            return render_template("register.html")
+            return render_template("register.jinja2")
 
         if password == "": 
             flash("Password anda kosong!", "error")
-            return render_template("register.html")
+            return render_template("register.jinja2")
         
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         cursor.execute("SELECT * FROM users WHERE username = %s", (username,))
@@ -81,7 +84,7 @@ def register():
 
         if existing_user:
             flash("Username sudah digunakan, silakan pilih username lain!", "error")
-            return render_template("register.html")
+            return render_template("register.jinja2")
 
         if password == confirm_password: 
             bytes = password.encode('utf-8') 
@@ -98,7 +101,7 @@ def register():
             return redirect(url_for('login'))
         else:
             flash("Pastikan password dan konfirmasi password sama!", "error")
-            return render_template("register.html") 
+            return render_template("register.jinja2") 
 
 @application.route("/logout")
 def logout():
@@ -111,9 +114,20 @@ def add_task():
         return redirect(url_for('login'))
     
     task_text = request.form.get("task")
+    priority = request.form.get("priority") 
+    due_date = request.form.get("due_date")
+    
+    try:
+        due_date_str = request.form.get("due_date")
+        due_date = datetime.strptime(due_date_str, "%Y-%m-%dT%H:%M")
+    except:
+        flash("Tolong masukan data dengan benar!", "error")
+        return redirect(url_for("home")) 
+
     if task_text:
         cursor = mysql.connection.cursor()
-        cursor.execute("INSERT INTO tasks (user_id, text) VALUES (%s, %s)", (session['user_id'], task_text))
+        cursor.execute("INSERT INTO tasks (user_id, text, priority, due_date) VALUES (%s, %s, %s, %s)", 
+                       (session['user_id'], task_text, priority, due_date))
         mysql.connection.commit()
         cursor.close()
     
@@ -155,14 +169,24 @@ def edit_task(task_id):
 
     if request.method == "POST":
         new_text = request.form.get("task")
+        new_priority = request.form.get("priority")
+        
+        try:
+            due_date_str = request.form.get("due_date")
+            new_due_date = datetime.strptime(due_date_str, "%Y-%m-%dT%H:%M")
+        except:
+            flash("Tolong masukan data dengan benar!", "error")
+            return redirect(url_for("home"))
+    
         cursor = mysql.connection.cursor()
-        cursor.execute("UPDATE tasks SET text = %s WHERE id = %s AND user_id = %s", (new_text, task_id, session['user_id']))
+        cursor.execute("UPDATE tasks SET text = %s, priority = %s, due_date = %s WHERE id = %s AND user_id = %s",
+                       (new_text, new_priority, new_due_date, task_id, session['user_id']))
         mysql.connection.commit()
         cursor.close()
         
         return redirect(url_for('home'))
     
-    return render_template("edit_task.html", task=task)
+    return render_template("edit_task.jinja2", task=task)
 
 @application.route("/profile", methods=['GET', 'POST'])
 def profile():
@@ -176,7 +200,6 @@ def profile():
 
         cursor = mysql.connection.cursor(MySQLdb.cursors.DictCursor)
         
-        # Cek apakah username baru sudah digunakan oleh user lain
         cursor.execute("SELECT * FROM users WHERE username = %s AND id != %s", (new_username, session['user_id']))
         existing_user = cursor.fetchone()
 
@@ -184,11 +207,9 @@ def profile():
             flash("Username sudah digunakan, silakan pilih yang lain!", "error")
             return redirect(url_for('profile'))
 
-        # Update username terlebih dahulu
         cursor.execute("UPDATE users SET username = %s WHERE id = %s", (new_username, session['user_id']))
         session['username'] = new_username
 
-        # Jika password diisi, lakukan update password
         if new_password:
             if new_password != confirm_password:
                 flash("Password tidak cocok, coba lagi!", "error")
@@ -203,7 +224,7 @@ def profile():
         flash("Profil berhasil diperbarui!", "success")
         return redirect(url_for('profile'))
 
-    return render_template("profile.html")
+    return render_template("profile.jinja2")
 
 if __name__ == "__main__": 
     application.run(debug=True)

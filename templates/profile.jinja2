@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile - Todo List</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://productionhagoitodo.s3.ap-southeast-1.amazonaws.com/css/styles.css" />
+  <link rel="stylesheet" href="https://productionhagoitodo.s3.ap-southeast-1.amazonaws.com/css/profile.css" />
+  <link rel="icon" href="https://productionhagoitodo.s3.ap-southeast-1.amazonaws.com/gambar/hagoi_logo.png"
+    type="image/png">
+</head>
+
+<body>
+
+  {% with messages = get_flashed_messages(with_categories=true) %} {% if
+  messages %}
+  <script>
+    {% for category, message in messages %}
+    Swal.fire({
+      icon: "{{ category }}",
+      title: "{{ message }}",
+      showConfirmButton: true,
+      confirmButtonColor: "#2d6e3e",
+      timer: 3000
+    });
+    {% endfor %}
+  </script>
+  {% endif %} {% endwith %}
+
+  <nav class="navbar d-flex justify-content-between align-items-center">
+    <div class="profile d-flex align-items-center">
+      <img src="https://www.svgrepo.com/show/384678/account-avatar-profile-user-9.svg" alt="Profile" width="40" />
+      <a href="{{ url_for('profile') }}" style="text-decoration: none" class="text-dark">👋 Halo, {{ session['username']
+        }}</a>
+    </div>
+    <a href="/logout" class="btn btn-outline-success">Logout</a>
+  </nav>
+  <div class="container profile-container">
+    <h3 class="text-center">🔧 Edit Profil</h3>
+    <form method="POST" action="/profile">
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username" name="username" value="{{ session['username'] }}"
+          required />
+      </div>
+      <div class="mb-3">
+        <label for="password" class="form-label">Password Baru</label>
+        <input type="password" class="form-control" id="password" name="password" />
+      </div>
+      <div class="mb-3">
+        <label for="confirm_password" class="form-label">Konfirmasi Password</label>
+        <input type="password" class="form-control" id="confirm_password" name="confirm_password" />
+      </div>
+      <button type="submit" class="btn btn-save">💾 Simpan Perubahan</button>
+    </form>
+    <a href="/" class="btn btn-outline-secondary mt-3 w-100">⬅ Kembali</a>
+  </div>
+</body>
+
+</html>
